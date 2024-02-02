@@ -15,7 +15,9 @@ const contactsPath = path.join(baseDir, outFileName);
 async function listContacts() {
   try {
     const data = await fs.readFile(contactsPath, "utf8");
-    console.log('contacts: ', data);
+    const parseData = await JSON.parse(data);
+    // console.log('contacts: ', data);
+    console.table(parseData);
   } catch (error) {
     console.log(error);
   }
@@ -55,7 +57,7 @@ async function removeContact(contactId) {
       }
     });
 
-    console.log("new contacts: ", newContacts);
+    console.table(newContacts);
     fs.writeFile(contactsPath, JSON.stringify(newContacts, null, 2), (err) => {
       if (err) {
         console.log("Failed to write updated data to file");
@@ -76,12 +78,11 @@ async function addContact(name, email, phone) {
     "email": email,
     "phone": phone,
   };
-  console.log("add contact - data: ", newContacts);
   try {
     const data = await fs.readFile(contactsPath, "utf8");
     let parseData = await JSON.parse(data);
     parseData = [...parseData, newContacts];
-    console.log("parseData: ", parseData);
+    console.table(parseData);
     fs.writeFile(contactsPath, JSON.stringify(parseData, null, 2), (err) => {
       if (err) {
         console.log("Failed to write updated data to file");
