@@ -1,22 +1,16 @@
 const fs = require("node:fs/promises");
 const path = require("path");
 const { nanoid } = require("nanoid");
-
-/*
- * Skomentuj i zapisz wartość
- * const contactsPath = ;
- */
+const { parse } = require("node:path");
 
 const baseDir = path.dirname("./db/contacts.json");
 const outFileName = path.basename("./db/contacts.json");
 const contactsPath = path.join(baseDir, outFileName);
 
-// TODO: udokumentuj każdą funkcję
 async function listContacts() {
   try {
     const data = await fs.readFile(contactsPath, "utf8");
     const parseData = await JSON.parse(data);
-    // console.log('contacts: ', data);
     console.table(parseData);
   } catch (error) {
     console.log(error);
@@ -24,19 +18,15 @@ async function listContacts() {
 }
 
 async function getContactById(contactId) {
-  // ...twój kod
   try {
     const data = await fs.readFile(contactsPath, "utf8");
     const parseData = await JSON.parse(data);
 
-    let arr_id = -1;
-    parseData.forEach((element, index) => {
-      if (element.id === contactId) {
-        arr_id = index;
-      }
+    let contact = parseData.find(({ id }) => {
+      return id === contactId;
     });
-    if (arr_id !== -1) {
-      return parseData[arr_id];
+    if (contact !== undefined) {
+      return contact;
     } else {
       console.log("the specified id value does not exist");
     }
@@ -45,8 +35,19 @@ async function getContactById(contactId) {
   }
 }
 
+async function _writeFile(file, data) {
+  const controller = new AbortController();
+  const { signal } = controller;
+  const promise = fs.writeFile(
+    file,
+    JSON.stringify(data, null, 2),
+    { signal },
+  );
+
+  await promise;
+}
+
 async function removeContact(contactId) {
-  // ...twój kod
   try {
     const data = await fs.readFile(contactsPath, "utf8");
     const parseData = await JSON.parse(data);
@@ -58,20 +59,17 @@ async function removeContact(contactId) {
     });
 
     console.table(newContacts);
-    fs.writeFile(contactsPath, JSON.stringify(newContacts, null, 2), (err) => {
-      if (err) {
-        console.log("Failed to write updated data to file");
-        return;
-      }
-      console.log("Updated file successfully");
-    });
-  } catch (error) {
-    console.log(error);
+
+    _writeFile(
+      contactsPath,
+      newContacts,
+    );
+  } catch (err) {
+    console.error(err);
   }
 }
 
 async function addContact(name, email, phone) {
-  // ...twój kod
   const newContacts = {
     "id": `${nanoid()}`,
     "name": name,
@@ -82,20 +80,18 @@ async function addContact(name, email, phone) {
     const data = await fs.readFile(contactsPath, "utf8");
     let parseData = await JSON.parse(data);
     parseData = [...parseData, newContacts];
+
     console.table(parseData);
-    fs.writeFile(contactsPath, JSON.stringify(parseData, null, 2), (err) => {
-      if (err) {
-        console.log("Failed to write updated data to file");
-        return;
-      }
-      console.log("Updated file successfully");
-    });
-  } catch (error) {
-    console.log(error);
+
+    _writeFile(
+      contactsPath,
+      parseData,
+    );
+  } catch (err) {
+    console.error(err);
   }
 }
 
-// module.exports
 module.exports = {
   listContacts,
   getContactById,
