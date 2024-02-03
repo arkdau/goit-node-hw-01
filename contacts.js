@@ -1,7 +1,6 @@
 const fs = require("node:fs/promises");
 const path = require("path");
 const { nanoid } = require("nanoid");
-const { parse } = require("node:path");
 
 const baseDir = path.dirname("./db/contacts.json");
 const outFileName = path.basename("./db/contacts.json");
